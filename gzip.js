@@ -6,11 +6,11 @@ const readdirAsync = promisify(fs.readdir);
 const lstatAsync = promisify(fs.lstat);
 const compress = zlib.createGzip();
 
-async function compressFile(filename) {
+async function compressFile(file, destination) {
     return new Promise((resolve, reject) => {
         let gzip = zlib.createGzip();
-        let readStream = fs.createReadStream(input);
-        let writeStream = fs.createWriteStream(output);
+        let readStream = fs.createReadStream(file);
+        let writeStream = fs.createWriteStream(destination);
 
         readStream.pipe(gzip);
         gzip.pipe(writeStream);
@@ -18,7 +18,8 @@ async function compressFile(filename) {
         readStream.on("error", error => reject(error))
         gzip.on("error", error => reject(error));
         writeStream.on("error", error => reject(error));
-        writeStream.on("close", () => resolve());
+
+        writeStream.on("close", () => resolve(destination));
     });
 }
 
@@ -44,5 +45,5 @@ async function getRecursiveFilesFromFolder(folder) {
 }
 
 module.exports = {
-    getRecursiveFilesFromFolder
+    getRecursiveFilesFromFolder, compressFile
 }
